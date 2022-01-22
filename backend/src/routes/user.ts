@@ -45,7 +45,7 @@ export async function userRoutes(fastify: FastifyInstance) {
       },
     },
   };
-  fastify.post("/user/new", newUserPostOpts, async (request, reply) => {
+  fastify.post("/user", newUserPostOpts, async (request, reply) => {
     const { body: user } = request;
     console.log(user);
     return { test: "test" };
