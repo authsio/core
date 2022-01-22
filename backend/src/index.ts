@@ -1,24 +1,33 @@
-import Fastify, { FastifyInstance, RouteShorthandOptions } from "fastify";
-import { uptime } from "./routes/uptime";
-import { userRoutes } from "./routes/user";
+import "reflect-metadata";
+import dotenv from "dotenv";
+dotenv.config({ debug: false });
+import { ApolloServer } from "apollo-server";
+import * as path from "path";
+import { buildSchema } from "type-graphql";
 
-const server: FastifyInstance = Fastify({
-  logger: true,
-});
 const PORT = process.env.PORT ?? 4000;
 
-server.register(userRoutes);
-server.register(uptime);
+interface MainContext {}
 
-const start = async () => {
-  try {
-    await server.listen(PORT);
+export type Context = Readonly<MainContext>;
 
-    const address = server.server.address();
-    const port = typeof address === "string" ? address : address?.port;
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-};
-start();
+async function bootstrap() {
+  // build TypeGraphQL executable schema
+  const schema = await buildSchema({
+    resolvers: [__dirname + "/**/*.resolver.{ts,js}"],
+    // automatically create `schema.gql` file with schema definition in current folder
+    emitSchemaFile: path.resolve(__dirname, "schema.gql"),
+  });
+
+  // Create GraphQL server
+  const server = new ApolloServer({
+    schema,
+    context: async (_intContext): Promise<Context> => ({}),
+  });
+
+  // Start the server
+  const { url } = await server.listen(PORT);
+  console.log(`Server is running, GraphQL Playground available at ${url}`);
+}
+
+bootstrap();
