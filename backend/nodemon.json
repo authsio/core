@@ -2,6 +2,5 @@
   "watch": ["src"],
   "ext": ".ts,.js,.json",
   "ignore": ["migrations", "seeders"],
-  "exec": "etsc && node ./dist/index.js",
-  "legacyWatch": true
+  "exec": "ts-node ./src/index.ts"
 }
