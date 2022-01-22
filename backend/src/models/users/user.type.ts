@@ -32,7 +32,7 @@ export class User extends Model {
 
   @Field(() => String)
   @Column(DataType.STRING)
-  public userName!: string;
+  public email!: string;
 
   @Field(() => Login, { nullable: true })
   @HasOne(() => Login)

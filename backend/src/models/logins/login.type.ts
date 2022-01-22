@@ -25,7 +25,7 @@ export class Login extends Model {
 
   @Field(() => String)
   @Column(DataType.STRING)
-  public userName!: string;
+  public email!: string;
 
   @Column(DataType.STRING)
   public passwordSalt!: string;

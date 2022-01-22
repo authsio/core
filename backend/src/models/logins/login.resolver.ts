@@ -32,10 +32,10 @@ function doesPasswordMatch(password: string, loginInfo: Login): boolean {
   return false;
 }
 
-async function generateJWT(db: Sequelize, userName: string): Promise<string> {
+async function generateJWT(db: Sequelize, email: string): Promise<string> {
   const user = (await db.models.User.findOne({
     where: {
-      userName,
+      email,
     },
   })) as User;
   return jwt.sign({ ...user }, JWT_SECRET, { expiresIn: "1h" });
@@ -45,7 +45,7 @@ async function generateJWT(db: Sequelize, userName: string): Promise<string> {
 export class LoginResolver {
   @Query(() => Token)
   async login(
-    @Arg("data", () => LoginInput) { userName, password }: LoginInput,
+    @Arg("data", () => LoginInput) { email, password }: LoginInput,
     @Ctx() { sequelize }: Context
   ): Promise<Token> {
     const standardError = {
@@ -57,7 +57,7 @@ export class LoginResolver {
     }
     const loginInfo = (await sequelize.models.Login.findOne({
       where: {
-        userName,
+        email,
       },
     })) as Login | null;
     if (!loginInfo) {
@@ -67,7 +67,7 @@ export class LoginResolver {
     if (!passwordMatch) {
       return standardError;
     }
-    const jwt = await generateJWT(sequelize, userName);
+    const jwt = await generateJWT(sequelize, email);
     return jwt
       ? {
           token: jwt,
