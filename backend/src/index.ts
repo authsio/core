@@ -4,10 +4,14 @@ dotenv.config({ debug: false });
 import { ApolloServer } from "apollo-server";
 import * as path from "path";
 import { buildSchema } from "type-graphql";
+import { Sequelize } from "sequelize-typescript";
+import { sequelize } from "./libs/db";
 
 const PORT = process.env.PORT ?? 4000;
 
-interface MainContext {}
+interface MainContext {
+  sequelize: Sequelize;
+}
 
 export type Context = Readonly<MainContext>;
 
@@ -22,7 +26,9 @@ async function bootstrap() {
   // Create GraphQL server
   const server = new ApolloServer({
     schema,
-    context: async (_intContext): Promise<Context> => ({}),
+    context: async (_intContext): Promise<Context> => ({
+      sequelize,
+    }),
   });
 
   // Start the server

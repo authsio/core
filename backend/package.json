@@ -25,6 +25,8 @@
     "class-validator": "^0.13.2",
     "dotenv": "^14.2.0",
     "graphql": "^15.3.0",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.14.0",
     "sequelize-typescript": "^2.1.2",
