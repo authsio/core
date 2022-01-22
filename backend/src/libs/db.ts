@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
+
 const localhost = "localhost";
 const standard = "postgres";
 
