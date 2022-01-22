@@ -1,6 +1,7 @@
 import {
   Column,
   DataType,
+  HasMany,
   HasOne,
   IsUUID,
   Model,
@@ -9,6 +10,7 @@ import {
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
 import { Login } from "../logins/login.type";
+import { Project } from "../project/project.type";
 
 @ObjectType()
 @Table({
@@ -37,4 +39,8 @@ export class User extends Model {
   @Field(() => Login, { nullable: true })
   @HasOne(() => Login)
   public login!: Login;
+
+  @Field(() => Project, { nullable: true })
+  @HasMany(() => Project)
+  public projects!: Project;
 }
