@@ -1,7 +1,7 @@
 import { FastifyInstance, RouteShorthandOptions } from "fastify";
 
 export async function uptime(fastify: FastifyInstance) {
-  const opts: RouteShorthandOptions = {
+  const pingGetOpts: RouteShorthandOptions = {
     schema: {
       response: {
         200: {
@@ -15,7 +15,7 @@ export async function uptime(fastify: FastifyInstance) {
       },
     },
   };
-  fastify.get("/ping", opts, async (_request, _reply) => {
+  fastify.get("/ping", pingGetOpts, async (_request, _reply) => {
     return { up: true };
   });
 }
