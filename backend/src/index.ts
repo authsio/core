@@ -6,14 +6,38 @@ import * as path from "path";
 import { buildSchema } from "type-graphql";
 import { Sequelize } from "sequelize-typescript";
 import { sequelize } from "./libs/db";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const PORT = process.env.PORT ?? 4000;
+// TODO: This should be a public key or secret set for each user.
+// NOTE: This means that each user's users should have their own key
+// NOTE: How will we determine what secret to use?
+export const JWT_SECRET = process.env.JWT_SECRET ?? "test";
 
 interface MainContext {
   sequelize: Sequelize;
+  decryptedToken: string | null | JwtPayload;
 }
 
 export type Context = Readonly<MainContext>;
+
+function decryptToken(headers: {
+  authorization?: string;
+}): string | null | JwtPayload {
+  if (!headers?.authorization) {
+    return null;
+  }
+  const rawToken = headers.authorization.split(" ")[1];
+  if (!rawToken) {
+    throw new Error("Please use standard Bearer token format");
+  }
+  try {
+    const token = jwt.verify(rawToken, JWT_SECRET);
+    return token ? token : null;
+  } catch (error) {
+    throw new Error(`Error with token: ${error}`);
+  }
+}
 
 async function bootstrap() {
   await sequelize.authenticate();
@@ -30,8 +54,9 @@ async function bootstrap() {
   // Create GraphQL server
   const server = new ApolloServer({
     schema,
-    context: async (_intContext): Promise<Context> => ({
+    context: async (integrationContext): Promise<Context> => ({
       sequelize,
+      decryptedToken: decryptToken(integrationContext.req.headers),
     }),
   });
 
