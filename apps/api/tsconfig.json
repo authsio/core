@@ -1,5 +1,0 @@
-{
-  "extends": "@authsio/tsconfig/base.json",
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
-}
