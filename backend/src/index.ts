@@ -16,6 +16,10 @@ interface MainContext {
 export type Context = Readonly<MainContext>;
 
 async function bootstrap() {
+  await sequelize.authenticate();
+  if (process.env.DATABASE_FORCE_SYNC === "yes") {
+    await sequelize.sync();
+  }
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
     resolvers: [__dirname + "/**/*.resolver.{ts,js}"],
