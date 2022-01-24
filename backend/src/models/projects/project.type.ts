@@ -34,7 +34,7 @@ export class Project extends Model {
 
   // This could be a public key, or something else,
   // But the goal with this is that every project will have its own signing secret
-  // This is key for data privacy and security
+  // This is key for security across projects and users to verify tokens
   @Column
   public jwtSigningSecret!: string;
 
