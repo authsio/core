@@ -1,3 +1,3 @@
 # core
 
-Core authsio web application for identity access management
+Core authsio web application for identity & access management
