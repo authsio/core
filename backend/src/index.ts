@@ -7,6 +7,8 @@ import { buildSchema } from "type-graphql";
 import { Sequelize } from "sequelize-typescript";
 import { sequelize } from "./libs/db";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { decode } from "punycode";
+import { Project } from "./models/projects/project.type";
 
 const PORT = process.env.PORT ?? 4000;
 // TODO: This should be a public key or secret set for each user.
@@ -21,9 +23,12 @@ interface MainContext {
 
 export type Context = Readonly<MainContext>;
 
-function decryptToken(headers: {
-  authorization?: string;
-}): string | null | JwtPayload {
+async function decryptAndVerifyToken(
+  headers: {
+    authorization?: string;
+  },
+  db: Sequelize
+): Promise<string | null | JwtPayload> {
   if (!headers?.authorization) {
     return null;
   }
@@ -31,8 +36,26 @@ function decryptToken(headers: {
   if (!rawToken) {
     throw new Error("Please use standard Bearer token format");
   }
+  const decoded = jwt.decode(rawToken);
+  if (!decoded || decoded === typeof "string") {
+    throw new Error("Please use standard Bearer token format for decode");
+  }
+  const { payload } = decoded as JwtPayload;
+  // This might not be correct, bc we might be on the wrong schema here
+  // We might need to use the projectId as the schema also
+  // db.models.Project.schema(payload.projectId).findOne
+  // TODO: Flush this out
+  const project = (await db.models.Project.findOne({
+    where: {
+      id: payload.projectId,
+    },
+  })) as Project;
+  if (!project) {
+    throw new Error("Can not find user project");
+  }
   try {
-    const token = jwt.verify(rawToken, JWT_SECRET);
+    // Take the project signing secret to verify the token
+    const token = jwt.verify(rawToken, project.jwtSigningSecret);
     return token ? token : null;
   } catch (error) {
     throw new Error(`Error with token: ${error}`);
@@ -56,7 +79,10 @@ async function bootstrap() {
     schema,
     context: async (integrationContext): Promise<Context> => ({
       sequelize,
-      decryptedToken: decryptToken(integrationContext.req.headers),
+      decryptedToken: await decryptAndVerifyToken(
+        integrationContext.req.headers,
+        sequelize
+      ),
     }),
   });
 
