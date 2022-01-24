@@ -32,6 +32,12 @@ export class Project extends Model {
   @Column(DataType.STRING)
   public name!: string;
 
+  // This could be a public key, or something else,
+  // But the goal with this is that every project will have its own signing secret
+  // This is key for data privacy and security
+  @Column
+  public jwtSigningSecret!: string;
+
   @ForeignKey(() => User)
   @Column(DataType.STRING)
   public userId!: string;
