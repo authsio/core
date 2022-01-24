@@ -3,12 +3,14 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   IsUUID,
   Model,
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
+import { Key } from "../keys/key.type";
 import { User } from "../users/user.type";
 
 @ObjectType()
@@ -37,4 +39,8 @@ export class Project extends Model {
   @Field(() => User)
   @BelongsTo(() => User)
   public userInfo!: User;
+
+  @Field(() => Key, { nullable: true })
+  @HasMany(() => Key)
+  public keys!: Key;
 }
