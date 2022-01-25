@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authsio</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="custom.css">
+</head>
+
+<body class="container">
+  <div class="main columns is-mobile is-multiline is-centered is-vcentered">
+    <section class="login-form-section section column is-one-third">
+      <div class="form-title">
+        <h2 class="form-title__text is-size-3 has-text-centered">Authsio - Login</h2>
+      </div>
+      <form class="login-form mt-0 pt-5" id="login-form" name="login-form"
+        onsubmit="event.preventDefault(); onSubmitLoginForm(event)">
+        <fieldset class="field mb-5">
+          <label for="email" class="label">Email</label>
+          <div class="control">
+            <input type="text" class="input" id="email" name="email" required placeholder="Email">
+          </div>
+        </fieldset>
+
+        <fieldset class="field mb-5">
+          <label for="password" class="label">Password</label>
+          <div class="control">
+            <input type="text" class="input" id="password" name="password" required placeholder="Password">
+          </div>
+        </fieldset>
+
+        <div class="field is-grouped mt-5">
+          <div class="control">
+            <button class="button" type="submit" id="login">Login</button>
+          </div>
+          <div class="control">
+            <button class="button is-text">Register instead</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="designer-tag">
+        <h3 class="designer-tag__label is-small has-text-weight-bold has-text-centered">Designed by <a
+            href="https://authsio.com">Authsio</a>
+        </h3>
+      </div>
+    </section>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+
+</html>
