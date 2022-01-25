@@ -1,6 +1,6 @@
-import { Arg, Ctx, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Context, JWT_SECRET } from "../..";
-import { LoginInput } from "./login.inputs";
+import { LoginInput, RegisterInput } from "./login.inputs";
 import { Login, Token } from "./login.type";
 import crypto from "crypto";
 import { Sequelize } from "sequelize-typescript";
@@ -43,17 +43,33 @@ async function generateJWT(db: Sequelize, email: string): Promise<string> {
 
 @Resolver(() => Login)
 export class LoginResolver {
+  standardError = {
+    token: null,
+    message: "INTERNAL ERROR",
+  };
+
+  @Mutation(() => Token)
+  async register(
+    @Arg("data", () => RegisterInput) data: RegisterInput,
+    @Ctx() { sequelize }: Context
+  ): Promise<Token> {
+    if (!sequelize) {
+      return this.standardError;
+    }
+    // Thoughts?
+    console.log({ data });
+    return this.standardError;
+  }
+
   @Query(() => Token)
   async login(
+    // will need to use the public key from the LoginInput here to determine the schema
+    // Or do we read the requesting user owner api key also?
     @Arg("data", () => LoginInput) { email, password }: LoginInput,
     @Ctx() { sequelize }: Context
   ): Promise<Token> {
-    const standardError = {
-      token: null,
-      message: "INTERNAL ERROR",
-    };
     if (!sequelize) {
-      return standardError;
+      return this.standardError;
     }
     const loginInfo = (await sequelize.models.Login.findOne({
       where: {
@@ -61,11 +77,11 @@ export class LoginResolver {
       },
     })) as Login | null;
     if (!loginInfo) {
-      return standardError;
+      return this.standardError;
     }
     const passwordMatch = doesPasswordMatch(password, loginInfo);
     if (!passwordMatch) {
-      return standardError;
+      return this.standardError;
     }
     const jwt = await generateJWT(sequelize, email);
     return jwt
@@ -73,6 +89,6 @@ export class LoginResolver {
           token: jwt,
           message: "SUCCESS",
         }
-      : standardError;
+      : this.standardError;
   }
 }

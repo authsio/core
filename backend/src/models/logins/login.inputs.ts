@@ -13,3 +13,19 @@ export class LoginInput {
   @Field()
   publicKey!: string;
 }
+
+@InputType()
+export class RegisterInput {
+  @IsEmail()
+  @Field()
+  email!: string;
+
+  @Field()
+  password!: string;
+
+  @Field({ nullable: true })
+  firstName!: string;
+
+  @Field({ nullable: true })
+  lastName!: string;
+}
