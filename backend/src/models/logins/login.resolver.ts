@@ -56,7 +56,6 @@ export class LoginResolver {
     if (!sequelize) {
       return this.standardError;
     }
-    // Thoughts?
     console.log({ data });
     return this.standardError;
   }
