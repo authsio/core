@@ -2,6 +2,10 @@
 
 Core authsio web application for identity & access management
 
+### Deployment (WIP)
+
+We are using [Turborepo](https://turborepo.org/) to compile and build our application.
+
 ### Developer Setup (WIP)
 
 #### Notes:
