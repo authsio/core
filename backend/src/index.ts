@@ -10,6 +10,10 @@ import { JwtPayload } from "jsonwebtoken";
 import { decryptAndVerifyToken } from "./utils/decrypt-and-verify-token";
 
 const PORT = process.env.PORT ?? 4000;
+// TODO: This should be a public key or secret set for each user.
+// NOTE: This means that each user's users should have their own key
+// NOTE: How will we determine what secret to use?
+export const JWT_SECRET = process.env.JWT_SECRET ?? "test";
 
 interface MainContext {
   sequelize: Sequelize;
