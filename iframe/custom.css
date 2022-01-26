@@ -1,17 +1,7 @@
 body, .main {
   min-height: 100vh;
 }
-
-.form-title {
-  height: 5rem;
-  margin: auto;
-  display: grid;
-  place-items: center;
-}
-
-.form-title__text {
-  vertical-align: middle;
-}
+/* 
 
 .login-form-section {
   border: 1px solid #ded;
@@ -21,16 +11,5 @@ body, .main {
 
 .login-form {
   padding: 3rem;
-}
-
-.designer-tag {
-  background-color: #e7f5ff;
-  height: 3rem;
-  display: grid;
-  place-items: center;
-}
-
-.designer-tag__label {
-  vertical-align: middle;
-}
+} */
 
