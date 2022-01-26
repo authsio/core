@@ -24,7 +24,7 @@ async function bootstrap() {
     await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
     await sequelize.sync();
     // NOTES: We only want to make the keys table
-    // Any other table isnt needed here
+    // Any other table isn't needed here
     await Promise.all(
       privateTables.map((dbModel) =>
         sequelize.query(`DROP TABLE IF EXISTS "${dbModel.getTableName()}";`)
