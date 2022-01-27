@@ -4,6 +4,7 @@ import { BootstrapNewAccountInput } from "./user.input";
 import { User } from "./user.type";
 import { v4 as uuidv4 } from "uuid";
 import { publicTables } from "../../libs/db";
+import { KEY_TYPE } from "../enums/key-types";
 
 const doNotTouchSchemas = [
   "pg_toast",
@@ -19,7 +20,7 @@ export class UserResolver {
       "This can only be used to bootstrap the project and reject calls after the initial setup",
   })
   async bootstrap(
-    @Arg("data") _input: BootstrapNewAccountInput,
+    @Arg("data") { firstName, lastName, email }: BootstrapNewAccountInput,
     @Ctx() { sequelize }: Context
   ): Promise<boolean> {
     const [results, metadata] = (await sequelize.query(
@@ -52,7 +53,18 @@ export class UserResolver {
       console.log(error);
     }
     // CREATE LOGIN, CREATE USER, CREATE KEY PUBLIC & PRIVATE
-    // THIS IS THE BASE PROJECT THAT WILL ALLOW OTHER PROJECTS
+    // THIS IS THE BASE PROJECT THAT WILL ALLOW OTHER PROJECTS TO BE MADE
+    const keys = [
+      { keyType: KEY_TYPE.PUBLIC, projectId: schema },
+      { keyType: KEY_TYPE.PRIVATE, projectId: schema },
+    ];
+    const createdKeys = await sequelize.models.Key.bulkCreate(keys);
+    const userAccount = await sequelize.models.User.schema(schema).create({
+      email,
+      firstName,
+      lastName,
+    });
+    // NEED TO HASH PASSWORD & SALT BEFORE MAKING LOGIN
     return false;
   }
 }
