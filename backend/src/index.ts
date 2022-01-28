@@ -5,12 +5,12 @@ import { ApolloServer } from "apollo-server";
 import * as path from "path";
 import { buildSchema } from "type-graphql";
 import { Sequelize } from "sequelize-typescript";
-import { sequelize } from "./libs/db";
+import { privateTables, sequelize } from "./libs/db";
 import { JwtPayload } from "jsonwebtoken";
 import { decryptAndVerifyToken } from "./utils/decrypt-and-verify-token";
 
 const PORT = process.env.PORT ?? 4000;
-// TODO: This should be a public key or secret set for each user.
+// TODO: This should be a public key or secret set for each project.
 // NOTE: This means that each user's users should have their own key
 // NOTE: How will we determine what secret to use?
 export const JWT_SECRET = process.env.JWT_SECRET ?? "test";
@@ -25,7 +25,15 @@ export type Context = Readonly<MainContext>;
 async function bootstrap() {
   await sequelize.authenticate();
   if (process.env.DATABASE_FORCE_SYNC === "yes") {
+    await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
     await sequelize.sync();
+    // NOTES: We only want to make the keys table
+    // Any other table isn't needed here
+    await Promise.all(
+      privateTables.map((dbModel) =>
+        sequelize.query(`DROP TABLE IF EXISTS "${dbModel.getTableName()}";`)
+      )
+    );
   }
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
