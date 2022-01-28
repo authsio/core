@@ -1,7 +1,7 @@
 {
   "name": "iframe",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "The iframe login/register interface for Authsio. It will allow the consumer to customise it to the project's needs.",
   "main": "login.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
