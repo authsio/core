@@ -24,6 +24,9 @@ export class Key extends Model {
   @Column(DataType.UUIDV4)
   public id!: string;
 
+  @Field()
+  public key!: string;
+
   @Field(() => KEY_TYPE)
   @Column(DataType.ENUM(...Object.values(KEY_TYPE)))
   public keyType!: KEY_TYPE;

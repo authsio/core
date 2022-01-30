@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType, ObjectType } from "type-graphql";
 import { Login } from "../logins/login.type";
 import { Project } from "../projects/project.type";
 
@@ -43,4 +43,16 @@ export class User extends Model {
   @Field(() => Project, { nullable: true })
   @HasMany(() => Project)
   public projects!: Project;
+}
+
+@ObjectType()
+export class BootstrapProject {
+  @Field({ nullable: true })
+  publicKey!: string;
+
+  @Field({ nullable: true })
+  privateKey!: string;
+
+  @Field({ nullable: true })
+  projectId!: string;
 }

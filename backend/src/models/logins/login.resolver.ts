@@ -2,35 +2,10 @@ import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Context, JWT_SECRET } from "../..";
 import { LoginInput, RegisterInput } from "./login.inputs";
 import { Login, Token } from "./login.type";
-import crypto from "crypto";
 import { Sequelize } from "sequelize-typescript";
 import { User } from "../users/user.type";
 import jwt from "jsonwebtoken";
-
-function doesPasswordMatch(password: string, loginInfo: Login): boolean {
-  crypto.pbkdf2(
-    password,
-    loginInfo.passwordSalt,
-    3600,
-    25,
-    "sha256",
-    (err, hashedPassword) => {
-      if (err) {
-        return false;
-      }
-      if (
-        !crypto.timingSafeEqual(
-          loginInfo.passwordHash as unknown as NodeJS.ArrayBufferView,
-          hashedPassword
-        )
-      ) {
-        return false;
-      }
-      return true;
-    }
-  );
-  return false;
-}
+import { doesPasswordMatch } from "../../utils/does-password-match";
 
 async function generateJWT(db: Sequelize, email: string): Promise<string> {
   const user = (await db.models.User.findOne({

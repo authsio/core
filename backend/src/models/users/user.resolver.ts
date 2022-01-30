@@ -1,10 +1,12 @@
 import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import { Context } from "../..";
 import { BootstrapNewAccountInput } from "./user.input";
-import { User } from "./user.type";
+import { BootstrapProject, User } from "./user.type";
 import { v4 as uuidv4 } from "uuid";
 import { publicTables } from "../../libs/db";
 import { KEY_TYPE } from "../enums/key-types";
+import { generateNewKey } from "../../utils/generate-key-pair";
+import { hashNewPassword } from "../../utils/hash-new-password";
 
 const doNotTouchSchemas = [
   "pg_toast",
@@ -20,9 +22,10 @@ export class UserResolver {
       "This can only be used to bootstrap the project and reject calls after the initial setup",
   })
   async bootstrap(
-    @Arg("data") { firstName, lastName, email }: BootstrapNewAccountInput,
+    @Arg("data")
+    { firstName, lastName, email, password }: BootstrapNewAccountInput,
     @Ctx() { sequelize }: Context
-  ): Promise<boolean> {
+  ): Promise<BootstrapProject | null> {
     const [results, metadata] = (await sequelize.query(
       "SELECT schema_name FROM information_schema.schemata"
     )) as [{ schema_name: string }[], any];
@@ -31,7 +34,7 @@ export class UserResolver {
       (i) => !doNotTouchSchemas.includes(i.schema_name)
     );
     if (touchableSchemas.length) {
-      return false;
+      return null;
     }
     // NOW WE HAVE ENSURED THAT NO OTHER SCHEMA ARE OUT THERE
     // THIS MEANS WE CAN BOOTSTRAP A NEW PROJECT
@@ -52,19 +55,43 @@ export class UserResolver {
     } catch (error) {
       console.log(error);
     }
-    // CREATE LOGIN, CREATE USER, CREATE KEY PUBLIC & PRIVATE
-    // THIS IS THE BASE PROJECT THAT WILL ALLOW OTHER PROJECTS TO BE MADE
+    // NEED TO CHECK THIS LOGIC
+    const publicKey = generateNewKey();
+    const privateKey = generateNewKey();
     const keys = [
-      { keyType: KEY_TYPE.PUBLIC, projectId: schema },
-      { keyType: KEY_TYPE.PRIVATE, projectId: schema },
+      {
+        keyType: KEY_TYPE.PUBLIC,
+        projectId: schema,
+        key: publicKey,
+      },
+      {
+        keyType: KEY_TYPE.PRIVATE,
+        projectId: schema,
+        key: privateKey,
+      },
     ];
+    // TODO: Could use a promise all and clean this up
     const createdKeys = await sequelize.models.Key.bulkCreate(keys);
-    const userAccount = await sequelize.models.User.schema(schema).create({
+    const userAccount = (await sequelize.models.User.schema(schema).create({
       email,
       firstName,
       lastName,
+    })) as User;
+    const { hashedPassword, salt } = hashNewPassword(password);
+    const userLogin = await sequelize.models.Login.schema(schema).create({
+      email,
+      passwordSalt: salt,
+      passwordHash: hashedPassword,
+      userId: userAccount.id,
     });
+    if (createdKeys && userAccount && userLogin) {
+      return {
+        publicKey,
+        privateKey,
+        projectId: schema,
+      };
+    }
     // NEED TO HASH PASSWORD & SALT BEFORE MAKING LOGIN
-    return false;
+    return null;
   }
 }
