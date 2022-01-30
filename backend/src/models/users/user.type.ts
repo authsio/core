@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
-import { Field, ID, ObjectType, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType } from "type-graphql";
 import { Login } from "../logins/login.type";
 import { Project } from "../projects/project.type";
 

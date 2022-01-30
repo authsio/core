@@ -55,7 +55,8 @@ export class UserResolver {
     } catch (error) {
       console.log(error);
     }
-    // NEED TO CHECK THIS LOGIC
+    // These are not real public and private keys but more permissions
+    // That we are going to store and use for different queries and ensure no leaking data
     const publicKey = generateNewKey();
     const privateKey = generateNewKey();
     const keys = [
@@ -70,7 +71,7 @@ export class UserResolver {
         key: privateKey,
       },
     ];
-    // TODO: Could use a promise all and clean this up
+    // TODO: Could use a promise all & or a transaction and clean this up
     const createdKeys = await sequelize.models.Key.bulkCreate(keys);
     const userAccount = (await sequelize.models.User.schema(schema).create({
       email,
@@ -91,7 +92,6 @@ export class UserResolver {
         projectId: schema,
       };
     }
-    // NEED TO HASH PASSWORD & SALT BEFORE MAKING LOGIN
     return null;
   }
 }
