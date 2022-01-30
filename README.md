@@ -22,6 +22,10 @@ We are using [Turborepo](https://turborepo.org/) to compile and build our applic
 - 5432: Has a docker container with Postgres running
 - 4000: Will have the node app, after starting it with `npm run start:dev` using default settings
 
+##### New Backend Project
+
+Using the `bootstrap` mutation you can setup a brand new workspace for you and your project's users.
+
 #### IFrame
 
 #### Frontend
