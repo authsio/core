@@ -44,3 +44,15 @@ export class User extends Model {
   @HasMany(() => Project)
   public projects!: Project;
 }
+
+@ObjectType()
+export class BootstrapProject {
+  @Field({ nullable: true })
+  publicKey!: string;
+
+  @Field({ nullable: true })
+  privateKey!: string;
+
+  @Field({ nullable: true })
+  projectId!: string;
+}

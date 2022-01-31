@@ -11,6 +11,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { KEY_TYPE } from "../enums/key-types";
 import { Project } from "../projects/project.type";
 
+// NOTE: This will be the only table in the public schema
 @ObjectType()
 @Table({
   paranoid: true,
@@ -23,10 +24,14 @@ export class Key extends Model {
   @Column(DataType.UUIDV4)
   public id!: string;
 
+  @Field()
+  public key!: string;
+
   @Field(() => KEY_TYPE)
   @Column(DataType.ENUM(...Object.values(KEY_TYPE)))
   public keyType!: KEY_TYPE;
 
+  // NOTE: This is really the schema where we want to do the lookup
   @ForeignKey(() => Project)
   @Column(DataType.STRING)
   public projectId!: string;
