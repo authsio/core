@@ -45,7 +45,7 @@ export class UserResolver {
       await sequelize.createSchema(schema, {});
       // Postgres might not have this extension by default
       await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
-      await sequelize.query("CREATE EXTENSION IF NOT EXISTS uuid-ossp;");
+      await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
       await sequelize.sync({ schema });
       await Promise.all(
         publicTables.map((dbModel) =>
