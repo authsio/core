@@ -32,5 +32,8 @@ yarn-error.log*
 .env.production.local
 .env
 
+# 
+notes.txt
+
 # turbo
 .turbo

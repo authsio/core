@@ -17,7 +17,7 @@ const doNotTouchSchemas = [
 
 @Resolver(() => User)
 export class UserResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => BootstrapProject, {
     description:
       "This can only be used to bootstrap the initial project and will reject calls after the initial setup",
     nullable: true,
@@ -40,7 +40,7 @@ export class UserResolver {
     // NOW WE HAVE ENSURED THAT NO OTHER SCHEMA ARE OUT THERE
     // THIS MEANS WE CAN BOOTSTRAP A NEW PROJECT
     // WE NEED TO FORCE THE FIRST SCHEMA UUID (name)
-    const schema = `pg_${generateNewKey()}`;
+    const schema = `auth_${generateNewKey()}`;
     try {
       await sequelize.createSchema(schema, {});
       // Postgres might not have this extension by default

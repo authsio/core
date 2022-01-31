@@ -10,7 +10,6 @@ import {
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
 import { KEY_TYPE } from "../enums/key-types";
-import { Project } from "../projects/project.type";
 
 // NOTE: This will be the only table in the public schema
 @ObjectType()
@@ -27,6 +26,7 @@ export class Key extends Model {
   public id!: string;
 
   @Field()
+  @Column
   public key!: string;
 
   @Field(() => KEY_TYPE)
@@ -34,6 +34,8 @@ export class Key extends Model {
   public keyType!: KEY_TYPE;
 
   // NOTE: This is really the schema where we want to do the lookup
-  @Column(DataType.UUID)
+  // NOTE: This could be any string value
+  // IDEAL World this will be a namespaced random bytes auth_(bites)
+  @Column
   public projectId!: string;
 }
