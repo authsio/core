@@ -19,14 +19,15 @@ const doNotTouchSchemas = [
 export class UserResolver {
   @Mutation(() => Boolean, {
     description:
-      "This can only be used to bootstrap the project and reject calls after the initial setup",
+      "This can only be used to bootstrap the initial project and will reject calls after the initial setup",
+    nullable: true,
   })
   async bootstrap(
     @Arg("data")
     { firstName, lastName, email, password }: BootstrapNewAccountInput,
     @Ctx() { sequelize }: Context
   ): Promise<BootstrapProject | null> {
-    const [results, metadata] = (await sequelize.query(
+    const [results] = (await sequelize.query(
       "SELECT schema_name FROM information_schema.schemata"
     )) as [{ schema_name: string }[], any];
     // Filter postgres and public out
@@ -39,11 +40,12 @@ export class UserResolver {
     // NOW WE HAVE ENSURED THAT NO OTHER SCHEMA ARE OUT THERE
     // THIS MEANS WE CAN BOOTSTRAP A NEW PROJECT
     // WE NEED TO FORCE THE FIRST SCHEMA UUID (name)
-    const schema = uuidv4();
+    const schema = generateNewKey();
     try {
       await sequelize.createSchema(schema, {});
       // Postgres might not have this extension by default
       await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
+      await sequelize.query("CREATE EXTENSION IF NOT EXISTS uuid-ossp;");
       await sequelize.sync({ schema });
       await Promise.all(
         publicTables.map((dbModel) =>
@@ -85,7 +87,7 @@ export class UserResolver {
       passwordHash: hashedPassword,
       userId: userAccount.id,
     });
-    if (createdKeys && userAccount && userLogin) {
+    if (createdKeys.length && userAccount && userLogin) {
       return {
         publicKey,
         privateKey,

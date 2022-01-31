@@ -15,6 +15,7 @@ We are using [Turborepo](https://turborepo.org/) to compile and build our applic
 
 #### Backend
 
+- This project is using node 16
 - You must be inside the `backend` folder to work on the backend code from the cli (ie: node & npm commands)
 - We recommend using vscode and install the [Remote - Containers Plugin](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 - Doing this will allow vscode to use the `.devcontainer` setting up your developer workspace

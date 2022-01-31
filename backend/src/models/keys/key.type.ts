@@ -1,6 +1,7 @@
 import {
   Column,
   DataType,
+  Default,
   ForeignKey,
   IsUUID,
   Model,
@@ -21,7 +22,8 @@ export class Key extends Model {
   @Field(() => ID)
   @IsUUID(4)
   @PrimaryKey
-  @Column(DataType.UUIDV4)
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
   public id!: string;
 
   @Field()
@@ -32,7 +34,6 @@ export class Key extends Model {
   public keyType!: KEY_TYPE;
 
   // NOTE: This is really the schema where we want to do the lookup
-  @ForeignKey(() => Project)
-  @Column(DataType.STRING)
+  @Column(DataType.UUID)
   public projectId!: string;
 }

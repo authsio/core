@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
-dotenv.config({ debug: false });
+dotenv.config({ debug: true });
 import { ApolloServer } from "apollo-server";
 import * as path from "path";
 import { buildSchema } from "type-graphql";
@@ -26,6 +26,7 @@ async function bootstrap() {
   await sequelize.authenticate();
   if (process.env.DATABASE_FORCE_SYNC === "yes") {
     await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
+    await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
     await sequelize.sync();
     // NOTES: We only want to make the keys table
     // Any other table isn't needed here

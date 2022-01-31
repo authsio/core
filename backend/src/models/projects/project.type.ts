@@ -2,6 +2,7 @@ import {
   BelongsTo,
   Column,
   DataType,
+  Default,
   ForeignKey,
   HasMany,
   IsUUID,
@@ -25,7 +26,8 @@ export class Project extends Model {
   @Field(() => ID)
   @IsUUID(4)
   @PrimaryKey
-  @Column(DataType.UUIDV4)
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
   public id!: string;
 
   @Field(() => String)
@@ -39,14 +41,12 @@ export class Project extends Model {
   public jwtSigningSecret!: string;
 
   @ForeignKey(() => User)
-  @Column(DataType.STRING)
+  @Column(DataType.UUID)
   public userId!: string;
 
   @Field(() => User)
   @BelongsTo(() => User)
   public userInfo!: User;
 
-  @Field(() => Key, { nullable: true })
-  @HasMany(() => Key)
-  public keys!: Key;
+  // KEYS
 }

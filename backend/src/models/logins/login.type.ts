@@ -7,6 +7,7 @@ import {
   PrimaryKey,
   DataType,
   Table,
+  Default,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
 import { User } from "../users/user.type";
@@ -20,7 +21,8 @@ export class Login extends Model {
   @Field(() => ID)
   @IsUUID(4)
   @PrimaryKey
-  @Column(DataType.UUIDV4)
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
   public id!: string;
 
   @Field(() => String)
@@ -34,7 +36,7 @@ export class Login extends Model {
   public passwordHash!: string;
 
   @ForeignKey(() => User)
-  @Column(DataType.STRING)
+  @Column(DataType.UUID)
   public userId!: string;
 
   @Field(() => User)

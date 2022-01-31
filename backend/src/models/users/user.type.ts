@@ -1,6 +1,7 @@
 import {
   Column,
   DataType,
+  Default,
   HasMany,
   HasOne,
   IsUUID,
@@ -21,7 +22,8 @@ export class User extends Model {
   @Field(() => ID)
   @IsUUID(4)
   @PrimaryKey
-  @Column(DataType.UUIDV4)
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
   public id!: string;
 
   @Field(() => String)
