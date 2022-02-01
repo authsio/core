@@ -2,6 +2,7 @@ import {
   Column,
   DataType,
   Default,
+  ForeignKey,
   HasMany,
   HasOne,
   IsUUID,
@@ -9,7 +10,7 @@ import {
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, Float, ID, ObjectType } from "type-graphql";
 import { Login } from "../logins/login.type";
 import { Project } from "../projects/project.type";
 
@@ -42,10 +43,6 @@ export class User extends Model {
   @HasOne(() => Login)
   public login!: Login;
 
-  @Field(() => Boolean)
-  @Column(DataType.BOOLEAN)
-  public isPaidAccount!: boolean;
-
   @Field(() => Project, { nullable: true })
   @HasMany(() => Project)
   public projects!: Project;
@@ -61,4 +58,38 @@ export class BootstrapProject {
 
   @Field({ nullable: true })
   projectId!: string;
+}
+
+@ObjectType()
+class UserPayments {
+  @Field(() => ID)
+  @IsUUID(4)
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
+  public id!: string;
+
+  @ForeignKey(() => User)
+  @Column(DataType.UUID)
+  public userId!: string;
+
+  @Field(() => String)
+  @Column(DataType.STRING)
+  public planName!: string;
+
+  @Field(() => Float)
+  @Column(DataType.FLOAT)
+  public planPrice!: number;
+
+  @Field(() => Number)
+  @Column(DataType.NUMBER)
+  public planProjectLimit!: number;
+
+  @Field(() => Date)
+  @Column(DataType.DATE)
+  public renewalDate!: Date;
+
+  @Field(() => String)
+  @Column(DataType.STRING)
+  public stripeId!: string;
 }
