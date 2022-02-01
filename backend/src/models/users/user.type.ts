@@ -42,6 +42,10 @@ export class User extends Model {
   @HasOne(() => Login)
   public login!: Login;
 
+  @Field(() => Boolean)
+  @Column(DataType.BOOLEAN)
+  public isPaidAccount!: boolean;
+
   @Field(() => Project, { nullable: true })
   @HasMany(() => Project)
   public projects!: Project;
