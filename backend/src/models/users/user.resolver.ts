@@ -1,12 +1,12 @@
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Context } from "../..";
 import { BootstrapNewAccountInput } from "./user.input";
 import { BootstrapProject, User } from "./user.type";
-import { v4 as uuidv4 } from "uuid";
 import { publicTables } from "../../libs/db";
 import { KEY_TYPE } from "../enums/key-types";
 import { generateNewKey } from "../../utils/generate-key-pair";
 import { hashNewPassword } from "../../utils/hash-new-password";
+import { Key } from "../keys/key.type";
 
 const doNotTouchSchemas = [
   "pg_toast",
@@ -17,6 +17,39 @@ const doNotTouchSchemas = [
 
 @Resolver(() => User)
 export class UserResolver {
+  // Need to sort out permissions on this @Auth()
+  // Assume we just want to confirm headers there
+  @Query(() => User, { nullable: true })
+  async me(
+    @Ctx() { decryptedToken, sequelize }: Context
+  ): Promise<User | null> {
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const user = (await sequelize.models.User.schema(schema).findOne({
+      where: {
+        id: decryptedToken.token.id,
+      },
+    })) as User;
+
+    return user ? user : null;
+  }
+
   @Mutation(() => BootstrapProject, {
     description:
       "This can only be used to bootstrap the initial project and will reject calls after the initial setup",
