@@ -6,9 +6,15 @@ import { Sequelize } from "sequelize-typescript";
 import { User } from "../users/user.type";
 import jwt from "jsonwebtoken";
 import { doesPasswordMatch } from "../../utils/does-password-match";
+import { Key } from "../keys/key.type";
+import { KEY_TYPE } from "../enums/key-types";
 
-async function generateJWT(db: Sequelize, email: string): Promise<string> {
-  const user = (await db.models.User.findOne({
+async function generateJWT(
+  db: Sequelize,
+  schema: string,
+  email: string
+): Promise<string> {
+  const user = (await db.models.User.schema(schema).findOne({
     where: {
       email,
     },
@@ -39,13 +45,26 @@ export class LoginResolver {
   async login(
     // will need to use the public key from the LoginInput here to determine the schema
     // Or do we read the requesting user owner api key also?
-    @Arg("data", () => LoginInput) { email, password }: LoginInput,
+    @Arg("data", () => LoginInput) { email, password, publicKey }: LoginInput,
     @Ctx() { sequelize }: Context
   ): Promise<Token> {
-    if (!sequelize) {
+    if (!sequelize || !publicKey) {
       return this.standardError;
     }
-    const loginInfo = (await sequelize.models.Login.findOne({
+    const findKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: publicKey,
+        keyType: KEY_TYPE.PUBLIC,
+      },
+    })) as Key;
+    if (!findKey) {
+      return this.standardError;
+    }
+    const schema = findKey.projectId;
+    if (!schema) {
+      return this.standardError;
+    }
+    const loginInfo = (await sequelize.models.Login.schema(schema).findOne({
       where: {
         email,
       },
@@ -57,7 +76,15 @@ export class LoginResolver {
     if (!passwordMatch) {
       return this.standardError;
     }
-    const jwt = await generateJWT(sequelize, email);
+    // TODO: How to find the init project where the schema and ID will not match....
+    // We need this so we can get the jwtSigningSecret
+    // We could for now not use this column but ideal world we need this to keep JWT on their own code
+    // const project = await sequelize.models.Project.schema(schema).findOne({
+    //   where: {
+    //     userId
+    //   }
+    // })
+    const jwt = await generateJWT(sequelize, schema, email);
     return jwt
       ? {
           token: jwt,
