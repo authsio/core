@@ -24,12 +24,12 @@ We are using [Turborepo](https://turborepo.org/) to compile and build our applic
 
 ### Developer Setup (WIP)
 
->#### Notes
+#### Notes
 
 - As this project is currently not feature stable, no postgres tables are currently made when running the backend application
 - Each section of the application has its own `package.json` and `tsconfig.json`
 
->#### Backend
+#### Backend
 
 - You must be inside the `backend` folder to work on the backend code from the cli (ie: node & npm commands)
 - We recommend using vscode and install the [Remote - Containers Plugin](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
@@ -38,15 +38,11 @@ We are using [Turborepo](https://turborepo.org/) to compile and build our applic
 - 5432: Has a docker container with Postgres running
 - 4000: Will have the node app, after starting it with `npm run start:dev` using default settings
 
->#### New Backend Project
+#### New Backend Project
 
 Using the `bootstrap` mutation you can setup a brand new workspace for you and your project's users.
 
->#### IFrame
-
-Planning in process
-
->#### Frontend
+#### IFrame
 
 Planning in process
 
@@ -67,3 +63,7 @@ Planning in process
 ### License
 
 [GNU Affero General Public License v3.0](https://github.com/authsio/core/blob/main/LICENSE)
+
+#### Frontend
+
+Planning in process
