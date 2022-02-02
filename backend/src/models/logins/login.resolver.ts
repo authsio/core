@@ -1,5 +1,5 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { Context, JWT_SECRET } from "../..";
+import { Context } from "../..";
 import { LoginInput, RegisterInput } from "./login.inputs";
 import { Login, Token } from "./login.type";
 import { Sequelize } from "sequelize-typescript";
@@ -8,18 +8,20 @@ import jwt from "jsonwebtoken";
 import { doesPasswordMatch } from "../../utils/does-password-match";
 import { Key } from "../keys/key.type";
 import { KEY_TYPE } from "../enums/key-types";
+import { Project } from "../projects/project.type";
 
 async function generateJWT(
   db: Sequelize,
   schema: string,
-  email: string
+  email: string,
+  jwtSecret: string
 ): Promise<string> {
   const user = (await db.models.User.schema(schema).findOne({
     where: {
       email,
     },
   })) as User;
-  return jwt.sign({ ...user }, JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ ...user }, jwtSecret, { expiresIn: "1h" });
 }
 
 @Resolver(() => Login)
@@ -79,12 +81,17 @@ export class LoginResolver {
     // TODO: How to find the init project where the schema and ID will not match....
     // We need this so we can get the jwtSigningSecret
     // We could for now not use this column but ideal world we need this to keep JWT on their own code
-    // const project = await sequelize.models.Project.schema(schema).findOne({
-    //   where: {
-    //     userId
-    //   }
-    // })
-    const jwt = await generateJWT(sequelize, schema, email);
+    const project = (await sequelize.models.Project.schema(schema).findOne({
+      where: {
+        projectId: schema,
+      },
+    })) as Project;
+    const jwt = await generateJWT(
+      sequelize,
+      schema,
+      email,
+      project.jwtSigningSecret
+    );
     return jwt
       ? {
           token: jwt,

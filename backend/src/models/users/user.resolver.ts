@@ -7,6 +7,7 @@ import { KEY_TYPE } from "../enums/key-types";
 import { generateNewKey } from "../../utils/generate-key-pair";
 import { hashNewPassword } from "../../utils/hash-new-password";
 import { Key } from "../keys/key.type";
+import { Project } from "../projects/project.type";
 
 const doNotTouchSchemas = [
   "pg_toast",
@@ -113,6 +114,12 @@ export class UserResolver {
       firstName,
       lastName,
     })) as User;
+    const project = (await sequelize.models.Project.schema(schema).create({
+      projectId: schema,
+      name: "Base Project",
+      jwtSigningSecret: generateNewKey(),
+      userId: userAccount.id,
+    })) as Project;
     const { hashedPassword, salt } = hashNewPassword(password);
     const userLogin = await sequelize.models.Login.schema(schema).create({
       email,
@@ -120,7 +127,7 @@ export class UserResolver {
       passwordHash: hashedPassword,
       userId: userAccount.id,
     });
-    if (createdKeys.length && userAccount && userLogin) {
+    if (createdKeys.length && userAccount && userLogin && project) {
       return {
         publicKey,
         privateKey,

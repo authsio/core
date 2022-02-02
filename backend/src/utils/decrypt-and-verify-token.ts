@@ -43,7 +43,7 @@ export async function decryptAndVerifyToken(
     foundKey?.projectId ?? payload?.projectId
   ).findOne({
     where: {
-      id: payload.projectId,
+      projectId: payload.projectId,
     },
   })) as Project;
   if (!project) {
