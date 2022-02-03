@@ -75,65 +75,82 @@ export class UserResolver {
     // THIS MEANS WE CAN BOOTSTRAP A NEW PROJECT
     // WE NEED TO FORCE THE FIRST SCHEMA UUID (name)
     const schema = `auth_${generateNewKey()}`;
-    try {
-      await sequelize.createSchema(schema, {});
+    await sequelize.createSchema(schema, {});
+    await sequelize.transaction(async (transaction) => {
       // Postgres might not have this extension by default
-      await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
-      await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
-      await sequelize.sync({ schema });
+      await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;", {
+        transaction,
+      });
+      await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`, {
+        transaction,
+      });
+      // @ts-ignore
+      await sequelize.sync({ schema, transaction });
       await Promise.all(
         publicTables.map((dbModel) =>
           sequelize.query(
-            `DROP TABLE IF EXISTS "${schema}"."${dbModel.getTableName()}";`
+            `DROP TABLE IF EXISTS "${schema}"."${dbModel.getTableName()}";`,
+            { transaction }
           )
         )
       );
-    } catch (error) {
-      console.log(error);
-    }
-    // These are not real public and private keys but more permissions
-    // That we are going to store and use for different queries and ensure no leaking data
-    const publicKey = generateNewKey();
-    const privateKey = generateNewKey();
-    const keys = [
-      {
-        keyType: KEY_TYPE.PUBLIC,
-        projectId: schema,
-        key: publicKey,
-      },
-      {
-        keyType: KEY_TYPE.PRIVATE,
-        projectId: schema,
-        key: privateKey,
-      },
-    ];
-    // TODO: Could use a promise all & or a transaction and clean this up
-    const createdKeys = await sequelize.models.Key.bulkCreate(keys);
-    const userAccount = (await sequelize.models.User.schema(schema).create({
-      email,
-      firstName,
-      lastName,
-    })) as User;
-    const project = (await sequelize.models.Project.schema(schema).create({
-      projectId: schema,
-      name: "Base Project",
-      jwtSigningSecret: generateNewKey(),
-      userId: userAccount.id,
-    })) as Project;
-    const { hashedPassword, salt } = hashNewPassword(password);
-    const userLogin = await sequelize.models.Login.schema(schema).create({
-      email,
-      passwordSalt: salt,
-      passwordHash: hashedPassword,
-      userId: userAccount.id,
     });
-    if (createdKeys.length && userAccount && userLogin && project) {
-      return {
-        publicKey,
-        privateKey,
-        projectId: schema,
-      };
-    }
-    return null;
+    return sequelize.transaction(async (transaction) => {
+      // These are not real public and private keys but more permissions
+      // That we are going to store and use for different queries and ensure no leaking data
+      const publicKey = generateNewKey();
+      const privateKey = generateNewKey();
+      const keys = [
+        {
+          keyType: KEY_TYPE.PUBLIC,
+          projectId: schema,
+          key: publicKey,
+        },
+        {
+          keyType: KEY_TYPE.PRIVATE,
+          projectId: schema,
+          key: privateKey,
+        },
+      ];
+      // TODO: Could use a promise all & or a transaction and clean this up
+      const createdKeys = await sequelize.models.Key.bulkCreate(keys, {
+        transaction,
+      });
+      const userAccount = (await sequelize.models.User.schema(schema).create(
+        {
+          email,
+          firstName,
+          lastName,
+        },
+        { transaction }
+      )) as User;
+      const project = (await sequelize.models.Project.schema(schema).create(
+        {
+          projectId: schema,
+          name: "Base Project",
+          jwtSigningSecret: generateNewKey(),
+          userId: userAccount.id,
+        },
+        { transaction }
+      )) as Project;
+      const { hashedPassword, salt } = hashNewPassword(password);
+      const userLogin = await sequelize.models.Login.schema(schema).create(
+        {
+          email,
+          passwordSalt: salt,
+          passwordHash: hashedPassword,
+          userId: userAccount.id,
+        },
+        { transaction }
+      );
+      if (createdKeys.length && userAccount && userLogin && project) {
+        return {
+          publicKey,
+          privateKey,
+          projectId: schema,
+        };
+      }
+      return null;
+    });
   }
 }

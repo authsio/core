@@ -21,16 +21,25 @@ export type Context = Readonly<MainContext>;
 async function bootstrap() {
   await sequelize.authenticate();
   if (process.env.DATABASE_FORCE_SYNC === "yes") {
-    await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
-    await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
-    await sequelize.sync();
-    // NOTES: We only want to make the keys table
-    // Any other table isn't needed here
-    await Promise.all(
-      privateTables.map((dbModel) =>
-        sequelize.query(`DROP TABLE IF EXISTS "${dbModel.getTableName()}";`)
-      )
-    );
+    await sequelize.transaction(async (transaction) => {
+      await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;", {
+        transaction,
+      });
+      await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`, {
+        transaction,
+      });
+      // @ts-ignore
+      await sequelize.sync({ transaction });
+      // NOTES: We only want to make the keys table
+      // Any other table isn't needed here
+      await Promise.all(
+        privateTables.map((dbModel) =>
+          sequelize.query(`DROP TABLE IF EXISTS "${dbModel.getTableName()}";`, {
+            transaction,
+          })
+        )
+      );
+    });
   }
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
