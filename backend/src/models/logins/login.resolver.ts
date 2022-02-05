@@ -5,11 +5,8 @@ import { Login, Token } from "./login.type";
 import { Sequelize } from "sequelize-typescript";
 import { User } from "../users/user.type";
 import jwt from "jsonwebtoken";
-import { doesPasswordMatch } from "../../utils/does-password-match";
 import { Key } from "../keys/key.type";
-import { KEY_TYPE } from "../enums/key-types";
 import { Project } from "../projects/project.type";
-import { hashNewPassword } from "../../utils/hash-new-password";
 
 async function generateJWT(
   db: Sequelize,
@@ -61,11 +58,10 @@ export class LoginResolver {
       firstName,
       lastName,
     })) as User;
-    const { hashedPassword, salt } = hashNewPassword(password);
+    // MAGIC UNDER THE HOOD HASHED PASSWORDS
     await sequelize.models.Login.schema(schema).create({
       email,
-      passwordSalt: salt,
-      passwordHash: hashedPassword,
+      passwordHash: password,
       userId: userAccount.id,
     });
     const project = (await sequelize.models.Project.schema(schema).findOne({
@@ -117,7 +113,7 @@ export class LoginResolver {
     if (!loginInfo) {
       return this.standardError;
     }
-    const passwordMatch = doesPasswordMatch(password, loginInfo);
+    const passwordMatch = loginInfo.passwordMatch(password);
     if (!passwordMatch) {
       return this.standardError;
     }

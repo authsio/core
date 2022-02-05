@@ -8,8 +8,14 @@ import {
   DataType,
   Table,
   Default,
+  BeforeCreate,
+  BeforeBulkCreate,
+  BeforeUpdate,
+  BeforeUpsert,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
+import { doesPasswordMatch } from "../../utils/does-password-match";
+import { hashNewPassword } from "../../utils/hash-new-password";
 import { User } from "../users/user.type";
 
 @ObjectType()
@@ -42,6 +48,26 @@ export class Login extends Model {
   @Field(() => User)
   @BelongsTo(() => User)
   public userInfo!: User;
+
+  public passwordMatch(checkPassword: string) {
+    return doesPasswordMatch(checkPassword, {
+      passwordSalt: this.passwordSalt,
+      passwordHash: this.passwordHash,
+    });
+  }
+
+  // TAKE IN THE STRING OF USERS PASSWORD AND CREATE HASH AND SALT
+  @BeforeCreate
+  @BeforeBulkCreate
+  @BeforeUpdate
+  @BeforeUpsert
+  static hashPassword(instance: Login) {
+    if (instance.passwordHash) {
+      const { hashedPassword, salt } = hashNewPassword(instance.passwordHash);
+      instance.passwordHash = hashedPassword;
+      instance.passwordSalt = salt;
+    }
+  }
 }
 
 @ObjectType()

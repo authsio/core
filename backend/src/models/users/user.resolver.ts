@@ -135,12 +135,11 @@ export class UserResolver {
         },
         { transaction }
       )) as Project;
-      const { hashedPassword, salt } = hashNewPassword(password);
+      // MAGIC UNDER THE HOOD HASHES THE PASSWORD
       const userLogin = await sequelize.models.Login.schema(schema).create(
         {
           email,
-          passwordSalt: salt,
-          passwordHash: hashedPassword,
+          passwordHash: password,
           userId: userAccount.id,
         },
         { transaction }
