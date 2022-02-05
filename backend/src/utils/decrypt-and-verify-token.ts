@@ -11,7 +11,7 @@ export async function decryptAndVerifyToken(
     "x-api-key"?: string;
   },
   db: Sequelize
-): Promise<string | null | JwtPayload> {
+): Promise<null | JwtPayload> {
   if (!headers?.authorization || !headers["x-api-key"]) {
     return null;
   }

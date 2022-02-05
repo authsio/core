@@ -9,6 +9,7 @@ import { doesPasswordMatch } from "../../utils/does-password-match";
 import { Key } from "../keys/key.type";
 import { KEY_TYPE } from "../enums/key-types";
 import { Project } from "../projects/project.type";
+import { hashNewPassword } from "../../utils/hash-new-password";
 
 async function generateJWT(
   db: Sequelize,
@@ -36,30 +37,69 @@ export class LoginResolver {
 
   @Mutation(() => Token)
   async register(
-    @Arg("data", () => RegisterInput) data: RegisterInput,
-    @Ctx() { sequelize }: Context
+    @Arg("data", () => RegisterInput)
+    { firstName, lastName, email, password }: RegisterInput,
+    @Ctx() { sequelize, decryptedToken }: Context
   ): Promise<Token> {
-    if (!sequelize) {
+    if (!sequelize || !decryptedToken?.key) {
       return this.standardError;
     }
-    console.log({ data });
-    return this.standardError;
+    const findKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!findKey) {
+      return this.standardError;
+    }
+    const schema = findKey.projectId;
+    if (!schema) {
+      return this.standardError;
+    }
+    const userAccount = (await sequelize.models.User.schema(schema).create({
+      email,
+      firstName,
+      lastName,
+    })) as User;
+    const { hashedPassword, salt } = hashNewPassword(password);
+    await sequelize.models.Login.schema(schema).create({
+      email,
+      passwordSalt: salt,
+      passwordHash: hashedPassword,
+      userId: userAccount.id,
+    });
+    const project = (await sequelize.models.Project.schema(schema).findOne({
+      where: {
+        projectId: schema,
+      },
+    })) as Project;
+    const jwt = await generateJWT(
+      sequelize,
+      schema,
+      userAccount.email,
+      project.jwtSigningSecret
+    );
+    return jwt
+      ? {
+          token: jwt,
+          message: "SUCCESS",
+        }
+      : this.standardError;
   }
 
   @Query(() => Token)
   async login(
     // will need to use the public key from the LoginInput here to determine the schema
     // Or do we read the requesting user owner api key also?
-    @Arg("data", () => LoginInput) { email, password, publicKey }: LoginInput,
-    @Ctx() { sequelize }: Context
+    @Arg("data", () => LoginInput) { email, password }: LoginInput,
+    @Ctx() { sequelize, decryptedToken }: Context
   ): Promise<Token> {
-    if (!sequelize || !publicKey) {
+    if (!sequelize || !decryptedToken?.key) {
       return this.standardError;
     }
     const findKey = (await sequelize.models.Key.findOne({
       where: {
-        key: publicKey,
-        keyType: KEY_TYPE.PUBLIC,
+        key: decryptedToken.key,
       },
     })) as Key;
     if (!findKey) {

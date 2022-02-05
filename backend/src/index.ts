@@ -13,7 +13,7 @@ const PORT = process.env.PORT ?? 4000;
 
 interface MainContext {
   sequelize: Sequelize;
-  decryptedToken: string | null | JwtPayload;
+  decryptedToken: null | JwtPayload;
 }
 
 export type Context = Readonly<MainContext>;
