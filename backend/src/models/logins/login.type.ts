@@ -50,6 +50,7 @@ export class Login extends Model {
   public userInfo!: User;
 
   public passwordMatch(checkPassword: string) {
+    // NO LOGGING
     return doesPasswordMatch(checkPassword, {
       passwordSalt: this.passwordSalt,
       passwordHash: this.passwordHash,
@@ -62,6 +63,7 @@ export class Login extends Model {
   @BeforeUpdate
   @BeforeUpsert
   static hashPassword(instance: Login) {
+    // NO LOGGING
     if (instance.passwordHash) {
       const { hashedPassword, salt } = hashNewPassword(instance.passwordHash);
       instance.passwordHash = hashedPassword;
