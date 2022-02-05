@@ -14,9 +14,8 @@ import {
   BeforeUpsert,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
-import { hashNewPassword } from "../../utils/hash-new-password";
 import { User } from "../users/user.type";
-import { scryptSync, timingSafeEqual } from "crypto";
+import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
 @ObjectType()
 @Table({
@@ -73,6 +72,7 @@ export class Login extends Model {
   }
 
   // TAKE IN THE STRING OF USERS PASSWORD AND CREATE HASH AND SALT
+  // THIS IS KINDA MAGIC, due to the fact that we are taking in a unhashed string
   @BeforeCreate
   @BeforeBulkCreate
   @BeforeUpdate
@@ -80,7 +80,12 @@ export class Login extends Model {
   static hashPassword(instance: Login) {
     // NO LOGGING
     if (instance.passwordHash) {
-      const { hashedPassword, salt } = hashNewPassword(instance.passwordHash);
+      const salt = randomBytes(16).toString("hex");
+      const hashedPassword = scryptSync(
+        instance.passwordHash,
+        salt,
+        64
+      ).toString("hex");
       instance.passwordHash = hashedPassword;
       instance.passwordSalt = salt;
     }

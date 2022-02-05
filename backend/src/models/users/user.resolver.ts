@@ -5,7 +5,6 @@ import { BootstrapProject, User } from "./user.type";
 import { publicTables } from "../../libs/db";
 import { KEY_TYPE } from "../enums/key-types";
 import { generateNewKey } from "../../utils/generate-key-pair";
-import { hashNewPassword } from "../../utils/hash-new-password";
 import { Key } from "../keys/key.type";
 import { Project } from "../projects/project.type";
 
