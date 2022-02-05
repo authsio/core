@@ -20,6 +20,7 @@ async function generateJWT(
     where: {
       email,
     },
+    raw: true,
   })) as User;
   return jwt.sign({ ...user, projectId: schema }, jwtSecret, {
     expiresIn: "1h",
