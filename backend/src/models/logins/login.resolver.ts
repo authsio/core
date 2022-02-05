@@ -21,7 +21,9 @@ async function generateJWT(
       email,
     },
   })) as User;
-  return jwt.sign({ ...user }, jwtSecret, { expiresIn: "1h" });
+  return jwt.sign({ ...user, projectId: schema }, jwtSecret, {
+    expiresIn: "1h",
+  });
 }
 
 @Resolver(() => Login)
