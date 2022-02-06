@@ -8,7 +8,7 @@
   "workspaceFolder": "/workspace",
   // Set *default* container specific settings.json values on container create.
   "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash",
+    "terminal.integrated.shell.linux": "/bin/zsh",
     "sqltools.connections": [
       {
         "name": "Container database",

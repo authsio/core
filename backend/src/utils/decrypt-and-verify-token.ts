@@ -12,11 +12,13 @@ export async function decryptAndVerifyToken(
   },
   db: Sequelize
 ): Promise<null | JwtPayload> {
-  if (!headers?.authorization || !headers["x-api-key"]) {
+  if (!headers?.authorization && !headers["x-api-key"]) {
     return null;
   }
   let key = headers["x-api-key"];
-  const rawToken = headers.authorization.split(" ")[1];
+  console.log({ key });
+  const rawToken =
+    headers?.authorization && headers.authorization.split(" ")[1];
   if (!rawToken) {
     return { key };
   }
