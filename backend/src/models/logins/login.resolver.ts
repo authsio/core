@@ -31,6 +31,35 @@ export class LoginResolver {
     token: null,
     message: "INTERNAL ERROR",
   };
+  @Mutation(() => Token)
+  async refreshToken(
+    @Ctx() { sequelize, decryptedToken }: Context
+  ): Promise<Token> {
+    if (!sequelize || !decryptedToken?.key) {
+      return this.standardError;
+    }
+    const findKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!findKey) {
+      return this.standardError;
+    }
+    const schema = findKey.projectId;
+    const project = (await sequelize.models.Project.schema(schema).findOne({
+      where: {
+        projectId: schema,
+      },
+    })) as Project;
+    const jwt = await generateJWT(
+      sequelize,
+      schema,
+      decryptedToken.token.email,
+      project.jwtSigningSecret
+    );
+    return jwt ? { token: jwt, message: "SUCCESS" } : this.standardError;
+  }
 
   @Mutation(() => Token)
   async register(
