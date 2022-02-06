@@ -41,11 +41,9 @@ export class UserResolver {
     if (!schema) {
       return null;
     }
-    console.log({ ...decryptedToken });
-    // TODO: This will change, after we clean up the JWT contents
     const user = (await sequelize.models.User.schema(schema).findOne({
       where: {
-        id: decryptedToken.token.dataValues.id,
+        id: decryptedToken.token.id,
       },
     })) as User;
 
