@@ -1,4 +1,12 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 import { Context } from "../..";
 import { BootstrapNewAccountInput } from "./user.input";
 import { BootstrapProject, User } from "./user.type";
@@ -150,5 +158,24 @@ export class UserResolver {
       }
       return null;
     });
+  }
+
+  @FieldResolver(() => [Project])
+  async projects(
+    @Root() user: User,
+    @Ctx() { sequelize, decryptedToken }: Context
+  ): Promise<Project[] | null> {
+    if (!decryptedToken?.token?.projectId) {
+      return null;
+    }
+    const projects = (await sequelize.models.Project.schema(
+      decryptedToken.token.projectId
+    ).findAll({
+      where: {
+        userId: user.id,
+      },
+      raw: true,
+    })) as Project[];
+    return projects;
   }
 }

@@ -30,6 +30,7 @@ export class Project extends Model {
   // NOTE: This is really the schema where we want to do the lookup
   // NOTE: This could be any string value
   // IDEAL World this will be a namespaced random bytes auth_(bites)
+  @Field()
   @Column
   public projectId!: string;
 
