@@ -20,15 +20,19 @@ import { User } from "../users/user.type";
   timestamps: true,
 })
 export class Project extends Model {
-  // The projectId will also be used as the schema name
-  // Each project will have a new postgres schema
-  // where we store the users of users
   @Field(() => ID)
   @IsUUID(4)
   @PrimaryKey
   @Default(DataType.UUIDV4)
   @Column(DataType.UUID)
   public id!: string;
+
+  // NOTE: This is really the schema where we want to do the lookup
+  // NOTE: This could be any string value
+  // IDEAL World this will be a namespaced random bytes auth_(bites)
+  @Field()
+  @Column
+  public projectId!: string;
 
   @Field(() => String)
   @Column(DataType.STRING)

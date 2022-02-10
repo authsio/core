@@ -11,27 +11,28 @@ export async function decryptAndVerifyToken(
     "x-api-key"?: string;
   },
   db: Sequelize
-): Promise<string | null | JwtPayload> {
-  if (!headers?.authorization || !headers["x-api-key"]) {
+): Promise<null | JwtPayload> {
+  if (!headers?.authorization && !headers["x-api-key"]) {
     return null;
   }
   let key = headers["x-api-key"];
-  const rawToken = headers.authorization.split(" ")[1];
+  console.log({ key });
+  const rawToken =
+    headers?.authorization && headers.authorization.split(" ")[1];
   if (!rawToken) {
     return { key };
   }
-  const decoded = jwt.decode(rawToken);
-  if (!decoded || decoded === typeof "string") {
+  const decoded = jwt.decode(rawToken) as JwtPayload;
+  if (!decoded) {
     return { key };
   }
-  const { payload } = decoded as JwtPayload;
   const foundKey = (await db.models.Key.findOne({
     where: {
       key,
     },
   })) as Key;
-  if (foundKey && payload.projectId) {
-    if (foundKey.projectId !== payload.projectId) {
+  if (foundKey && decoded.projectId) {
+    if (foundKey.projectId !== decoded.projectId) {
       throw new Error("Dont be sneaky");
     }
   }
@@ -40,10 +41,10 @@ export async function decryptAndVerifyToken(
   // db.models.Project.schema(payload.projectId).findOne
   // Might be able to use the key here to lookup the project schema???
   const project = (await db.models.Project.schema(
-    foundKey?.projectId ?? payload?.projectId
+    foundKey?.projectId ?? decoded?.projectId
   ).findOne({
     where: {
-      id: payload.projectId,
+      projectId: foundKey?.projectId ?? decoded?.projectId,
     },
   })) as Project;
   if (!project) {

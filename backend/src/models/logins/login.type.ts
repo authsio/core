@@ -8,9 +8,14 @@ import {
   DataType,
   Table,
   Default,
+  BeforeCreate,
+  BeforeBulkCreate,
+  BeforeUpdate,
+  BeforeUpsert,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
 import { User } from "../users/user.type";
+import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
 @ObjectType()
 @Table({
@@ -42,6 +47,49 @@ export class Login extends Model {
   @Field(() => User)
   @BelongsTo(() => User)
   public userInfo!: User;
+
+  private doesPasswordMatch(
+    password: string,
+    {
+      passwordSalt,
+      passwordHash,
+    }: { passwordSalt: string; passwordHash: string }
+  ): boolean {
+    const hashedBuffer = scryptSync(password, passwordSalt, 64);
+    const keyBuffer = Buffer.from(passwordHash, "hex");
+    if (hashedBuffer.length !== keyBuffer.length) {
+      return false;
+    }
+    return timingSafeEqual(hashedBuffer, keyBuffer);
+  }
+
+  public passwordMatch(checkPassword: string) {
+    // NO LOGGING
+    return this.doesPasswordMatch(checkPassword, {
+      passwordSalt: this.passwordSalt,
+      passwordHash: this.passwordHash,
+    });
+  }
+
+  // TAKE IN THE STRING OF USERS PASSWORD AND CREATE HASH AND SALT
+  // THIS IS KINDA MAGIC, due to the fact that we are taking in a unhashed string
+  @BeforeCreate
+  @BeforeBulkCreate
+  @BeforeUpdate
+  @BeforeUpsert
+  static hashPassword(instance: Login) {
+    // NO LOGGING
+    if (instance.passwordHash) {
+      const salt = randomBytes(16).toString("hex");
+      const hashedPassword = scryptSync(
+        instance.passwordHash,
+        salt,
+        64
+      ).toString("hex");
+      instance.passwordHash = hashedPassword;
+      instance.passwordSalt = salt;
+    }
+  }
 }
 
 @ObjectType()

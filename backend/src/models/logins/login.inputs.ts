@@ -9,9 +9,6 @@ export class LoginInput {
 
   @Field()
   password!: string;
-
-  @Field()
-  publicKey!: string;
 }
 
 @InputType()

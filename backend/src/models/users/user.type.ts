@@ -43,9 +43,9 @@ export class User extends Model {
   @HasOne(() => Login)
   public login!: Login;
 
-  @Field(() => Project, { nullable: true })
+  @Field(() => [Project], { nullable: true })
   @HasMany(() => Project)
-  public projects!: Project;
+  public projects!: Project[];
 }
 
 @ObjectType()
