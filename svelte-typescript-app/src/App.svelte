@@ -1,25 +1,18 @@
 <script lang="ts">
-	let n: Number = Math.random();
+	
 </script>
 
 <main>
-	<h1>Authsio</h1>
+	<h1 class="logo">Authsio</h1>
 	<button>Logout</button>
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
+	.logo {
 		color: #ff3e00;
 		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
+		font-size: 2em;
+		font-weight: 10;
 	}
 
 	@media (min-width: 640px) {
