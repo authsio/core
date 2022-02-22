@@ -8,6 +8,7 @@ import {
   Model,
   PrimaryKey,
   Table,
+  Unique,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
 import { Login } from "../logins/login.type";
@@ -35,7 +36,8 @@ export class User extends Model {
   public lastName!: string;
 
   @Field(() => String)
-  @Column(DataType.STRING)
+  @Unique
+  @Column(DataType.CITEXT)
   public email!: string;
 
   @Field(() => Login, { nullable: true })
