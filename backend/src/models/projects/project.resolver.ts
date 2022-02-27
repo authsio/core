@@ -10,7 +10,7 @@ import { Project } from "./project.type";
 @Resolver(() => Project)
 export class ProjectResolver {
   // TODO: Still need to flush out the logic here, it might be missing something...
-  @Mutation(() => Project, { nullable: true })
+  @Mutation(() => BootstrapProject, { nullable: true })
   async createProject(
     @Arg("projectName") projectName: string,
     @Ctx() { decryptedToken, sequelize }: Context
@@ -43,14 +43,14 @@ export class ProjectResolver {
       return null;
     }
     const newSchema = `auth_${generateNewKey()}`;
-    await sequelize.createSchema(schema, {});
+    await sequelize.createSchema(newSchema, {});
     await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
     await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
-    await sequelize.sync({ schema });
+    await sequelize.sync({ schema: newSchema });
     await Promise.all(
       publicTables.map((dbModel) =>
         sequelize.query(
-          `DROP TABLE IF EXISTS "${schema}"."${dbModel.getTableName()}";`
+          `DROP TABLE IF EXISTS "${newSchema}"."${dbModel.getTableName()}";`
         )
       )
     );
@@ -59,18 +59,18 @@ export class ProjectResolver {
     const keys = [
       {
         keyType: KEY_TYPE.PUBLIC,
-        projectId: schema,
+        projectId: newSchema,
         key: publicKey,
       },
       {
         keyType: KEY_TYPE.PRIVATE,
-        projectId: schema,
+        projectId: newSchema,
         key: privateKey,
       },
     ];
     const createdKeys = await sequelize.models.Key.bulkCreate(keys);
     const project = (await sequelize.models.Project.schema(schema).create({
-      projectId: schema,
+      projectId: newSchema,
       name: projectName,
       jwtSigningSecret: generateNewKey(),
       userId: user.id,
