@@ -41,10 +41,10 @@ export async function decryptAndVerifyToken(
   // db.models.Project.schema(payload.projectId).findOne
   // Might be able to use the key here to lookup the project schema???
   const project = (await db.models.Project.schema(
-    foundKey?.projectId ?? decoded?.projectId
+    foundKey?.parentProjectId
   ).findOne({
     where: {
-      projectId: foundKey?.projectId ?? decoded?.projectId,
+      projectId: foundKey?.parentProjectId,
     },
   })) as Project;
   if (!project) {

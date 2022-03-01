@@ -38,4 +38,9 @@ export class Key extends Model {
   // IDEAL World this will be a namespaced random bytes auth_(bites)
   @Column
   public projectId!: string;
+
+  // NOTE: This is the parent project that owns the project lookup
+  // NOTE: We need this to lookup the jwt signing key
+  @Column
+  public parentProjectId!: string;
 }

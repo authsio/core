@@ -10,7 +10,7 @@ import { Project } from "./project.type";
 @Resolver(() => Project)
 export class ProjectResolver {
   // TODO: Still need to flush out the logic here, it might be missing something...
-  @Mutation(() => Project, { nullable: true })
+  @Mutation(() => BootstrapProject, { nullable: true })
   async createProject(
     @Arg("projectName") projectName: string,
     @Ctx() { decryptedToken, sequelize }: Context
@@ -30,7 +30,7 @@ export class ProjectResolver {
     if (!foundKey) {
       return null;
     }
-    const schema = foundKey.projectId;
+    const schema = foundKey.parentProjectId;
     if (!schema) {
       return null;
     }
@@ -43,14 +43,14 @@ export class ProjectResolver {
       return null;
     }
     const newSchema = `auth_${generateNewKey()}`;
-    await sequelize.createSchema(schema, {});
+    await sequelize.createSchema(newSchema, {});
     await sequelize.query("CREATE EXTENSION IF NOT EXISTS citext;");
     await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
-    await sequelize.sync({ schema });
+    await sequelize.sync({ schema: newSchema });
     await Promise.all(
       publicTables.map((dbModel) =>
         sequelize.query(
-          `DROP TABLE IF EXISTS "${schema}"."${dbModel.getTableName()}";`
+          `DROP TABLE IF EXISTS "${newSchema}"."${dbModel.getTableName()}";`
         )
       )
     );
@@ -59,18 +59,20 @@ export class ProjectResolver {
     const keys = [
       {
         keyType: KEY_TYPE.PUBLIC,
-        projectId: schema,
+        projectId: newSchema,
+        parentProjectId: schema,
         key: publicKey,
       },
       {
         keyType: KEY_TYPE.PRIVATE,
-        projectId: schema,
+        projectId: newSchema,
+        parentProjectId: schema,
         key: privateKey,
       },
     ];
     const createdKeys = await sequelize.models.Key.bulkCreate(keys);
     const project = (await sequelize.models.Project.schema(schema).create({
-      projectId: schema,
+      projectId: newSchema,
       name: projectName,
       jwtSigningSecret: generateNewKey(),
       userId: user.id,
@@ -84,31 +86,140 @@ export class ProjectResolver {
     }
     return null;
   }
-  @Query(() => Project)
-  async readProjects(): Promise<Project[]> {
-    return [];
+  @Query(() => [Project], { nullable: true })
+  async readProjects(
+    @Arg("projectIds") ids: string[],
+    @Ctx() { decryptedToken, sequelize }: Context
+  ): Promise<Project[] | null> {
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const projects = (await sequelize.models.Project.schema(schema).findAll({
+      where: {
+        id: ids,
+        userId: decryptedToken.token.id,
+      },
+    })) as Project[];
+    return projects.length ? projects : [];
   }
 
-  @Query(() => Project)
+  @Query(() => Project, { nullable: true })
   async readProject(
-    @Arg("projectId") projectId: string
+    @Arg("projectId") projectId: string,
+    @Ctx() { decryptedToken, sequelize }: Context
   ): Promise<Project | null> {
-    console.log(projectId);
-    return null;
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const project = (await sequelize.models.Project.schema(schema).findOne({
+      where: {
+        id: projectId,
+        userId: decryptedToken.token.id,
+      },
+    })) as Project;
+    return project ? project : null;
   }
 
-  @Mutation(() => Project)
+  @Mutation(() => Project, { nullable: true })
   async editProject(
-    @Arg("projectName") projectName: string
+    @Arg("projectName") projectName: string,
+    @Arg("projectId") projectId: string,
+    @Ctx() { decryptedToken, sequelize }: Context
   ): Promise<Project | null> {
-    console.log(projectName);
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const [_count, projects] = (await sequelize.models.Project.schema(
+      schema
+    ).update(
+      {
+        name: projectName,
+      },
+      {
+        where: { id: projectId, userId: decryptedToken.token.id },
+        returning: true,
+      }
+    )) as [number, Project[]];
+    if (projects.length === 1) {
+      return {
+        ...projects[0],
+        id: projectId,
+      } as Project;
+    }
     return null;
   }
 
   @Mutation(() => Project)
   // NOTES: Takes an array of projectIds and deletes everything
   // Schema & Keys
-  async deleteProjects(): Promise<boolean> {
+  async deleteProjects(
+    @Arg("projectIds") ids: string[],
+    @Ctx() { decryptedToken, sequelize }: Context
+  ): Promise<boolean> {
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return false;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return false;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return false;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return false;
+    }
+    // TODO: FLUSH OUT THE DELETE PART
     return false;
   }
 }
