@@ -46,7 +46,8 @@ export class LoginResolver {
     if (!findKey) {
       return this.standardError;
     }
-    const schema = findKey.projectId;
+    const schema = findKey.parentProjectId;
+    const newSchema = findKey.projectId;
     const project = (await sequelize.models.Project.schema(schema).findOne({
       where: {
         projectId: schema,
@@ -54,7 +55,7 @@ export class LoginResolver {
     })) as Project;
     const jwt = await generateJWT(
       sequelize,
-      schema,
+      newSchema,
       decryptedToken.token.email,
       project.jwtSigningSecret
     );
@@ -78,17 +79,18 @@ export class LoginResolver {
     if (!findKey) {
       return this.standardError;
     }
-    const schema = findKey.projectId;
+    const schema = findKey.parentProjectId;
+    const newSchema = findKey.projectId;
     if (!schema) {
       return this.standardError;
     }
-    const userAccount = (await sequelize.models.User.schema(schema).create({
+    const userAccount = (await sequelize.models.User.schema(newSchema).create({
       email,
       firstName,
       lastName,
     })) as User;
     // MAGIC UNDER THE HOOD HASHED PASSWORDS
-    await sequelize.models.Login.schema(schema).create({
+    await sequelize.models.Login.schema(newSchema).create({
       email,
       passwordHash: password,
       userId: userAccount.id,
@@ -100,7 +102,7 @@ export class LoginResolver {
     })) as Project;
     const jwt = await generateJWT(
       sequelize,
-      schema,
+      newSchema,
       userAccount.email,
       project.jwtSigningSecret
     );
@@ -130,11 +132,12 @@ export class LoginResolver {
     if (!findKey) {
       return this.standardError;
     }
-    const schema = findKey.projectId;
+    const schema = findKey.parentProjectId;
+    const newSchema = findKey.projectId;
     if (!schema) {
       return this.standardError;
     }
-    const loginInfo = (await sequelize.models.Login.schema(schema).findOne({
+    const loginInfo = (await sequelize.models.Login.schema(newSchema).findOne({
       where: {
         email,
       },
@@ -156,7 +159,7 @@ export class LoginResolver {
     })) as Project;
     const jwt = await generateJWT(
       sequelize,
-      schema,
+      newSchema,
       email,
       project.jwtSigningSecret
     );

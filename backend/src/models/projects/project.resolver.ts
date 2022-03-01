@@ -30,7 +30,7 @@ export class ProjectResolver {
     if (!foundKey) {
       return null;
     }
-    const schema = foundKey.projectId;
+    const schema = foundKey.parentProjectId;
     if (!schema) {
       return null;
     }
@@ -60,11 +60,13 @@ export class ProjectResolver {
       {
         keyType: KEY_TYPE.PUBLIC,
         projectId: newSchema,
+        parentProjectId: schema,
         key: publicKey,
       },
       {
         keyType: KEY_TYPE.PRIVATE,
         projectId: newSchema,
+        parentProjectId: schema,
         key: privateKey,
       },
     ];

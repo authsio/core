@@ -54,7 +54,6 @@ export class UserResolver {
         id: decryptedToken.token.id,
       },
     })) as User;
-
     return user ? user : null;
   }
 
@@ -111,11 +110,13 @@ export class UserResolver {
         {
           keyType: KEY_TYPE.PUBLIC,
           projectId: schema,
+          parentProjectId: schema,
           key: publicKey,
         },
         {
           keyType: KEY_TYPE.PRIVATE,
           projectId: schema,
+          parentProjectId: schema,
           key: privateKey,
         },
       ];
