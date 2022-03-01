@@ -86,31 +86,140 @@ export class ProjectResolver {
     }
     return null;
   }
-  @Query(() => Project)
-  async readProjects(): Promise<Project[]> {
-    return [];
+  @Query(() => [Project], { nullable: true })
+  async readProjects(
+    @Arg("projectIds") ids: string[],
+    @Ctx() { decryptedToken, sequelize }: Context
+  ): Promise<Project[] | null> {
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const projects = (await sequelize.models.Project.schema(schema).findAll({
+      where: {
+        id: ids,
+        userId: decryptedToken.token.id,
+      },
+    })) as Project[];
+    return projects.length ? projects : [];
   }
 
-  @Query(() => Project)
+  @Query(() => Project, { nullable: true })
   async readProject(
-    @Arg("projectId") projectId: string
+    @Arg("projectId") projectId: string,
+    @Ctx() { decryptedToken, sequelize }: Context
   ): Promise<Project | null> {
-    console.log(projectId);
-    return null;
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const project = (await sequelize.models.Project.schema(schema).findOne({
+      where: {
+        id: projectId,
+        userId: decryptedToken.token.id,
+      },
+    })) as Project;
+    return project ? project : null;
   }
 
-  @Mutation(() => Project)
+  @Mutation(() => Project, { nullable: true })
   async editProject(
-    @Arg("projectName") projectName: string
+    @Arg("projectName") projectName: string,
+    @Arg("projectId") projectId: string,
+    @Ctx() { decryptedToken, sequelize }: Context
   ): Promise<Project | null> {
-    console.log(projectName);
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return null;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return null;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return null;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return null;
+    }
+    const [_count, projects] = (await sequelize.models.Project.schema(
+      schema
+    ).update(
+      {
+        name: projectName,
+      },
+      {
+        where: { id: projectId, userId: decryptedToken.token.id },
+        returning: true,
+      }
+    )) as [number, Project[]];
+    if (projects.length === 1) {
+      return {
+        ...projects[0],
+        id: projectId,
+      } as Project;
+    }
     return null;
   }
 
   @Mutation(() => Project)
   // NOTES: Takes an array of projectIds and deletes everything
   // Schema & Keys
-  async deleteProjects(): Promise<boolean> {
+  async deleteProjects(
+    @Arg("projectIds") ids: string[],
+    @Ctx() { decryptedToken, sequelize }: Context
+  ): Promise<boolean> {
+    if (!decryptedToken || typeof decryptedToken === "string") {
+      return false;
+    }
+    if (!decryptedToken?.key || !decryptedToken?.token) {
+      return false;
+    }
+    const foundKey = (await sequelize.models.Key.findOne({
+      where: {
+        key: decryptedToken.key,
+      },
+    })) as Key;
+    if (!foundKey) {
+      return false;
+    }
+    const schema = foundKey.projectId;
+    if (!schema) {
+      return false;
+    }
+    // TODO: FLUSH OUT THE DELETE PART
     return false;
   }
 }
