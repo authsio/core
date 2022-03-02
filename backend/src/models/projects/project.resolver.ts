@@ -219,6 +219,7 @@ export class ProjectResolver {
     if (!schema) {
       return false;
     }
+    console.log(ids);
     // TODO: FLUSH OUT THE DELETE PART
     return false;
   }
