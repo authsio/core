@@ -88,7 +88,7 @@ export class ProjectResolver {
   }
   @Query(() => [Project], { nullable: true })
   async readProjects(
-    @Arg("projectIds") ids: string[],
+    @Arg("projectIds" () => [String]) ids: string[],
     @Ctx() { decryptedToken, sequelize }: Context
   ): Promise<Project[] | null> {
     if (!decryptedToken || typeof decryptedToken === "string") {
@@ -198,7 +198,7 @@ export class ProjectResolver {
   // NOTES: Takes an array of projectIds and deletes everything
   // Schema & Keys
   async deleteProjects(
-    @Arg("projectIds") ids: string[],
+    @Arg("projectIds" () => [String]) ids: string[],
     @Ctx() { decryptedToken, sequelize }: Context
   ): Promise<boolean> {
     if (!decryptedToken || typeof decryptedToken === "string") {
