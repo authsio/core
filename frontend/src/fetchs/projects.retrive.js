@@ -1,25 +1,31 @@
-import useNetwork from "./network.js"
+import useFetch from "./fetch"
+let fetchData
 
-const { basePath } = useNetwork()
-let { headers } = useNetwork()
-
-export default function useFetchProjects(authToken) {
-  headers = updateHeaders(authToken)
+export default function useRetrieveProjects(authToken) {
+  const { fetchPostRequest } = useFetch(authToken)
+  fetchData = fetchPostRequest
 
   return {
     fetchProjects
   }
 }
 
-function updateHeaders(authToken) {
-  return {
-    ...headers,
-    'Authorization': `Bearer ${authToken}`
-  }
+function getFetchProjectsQuery() {
+  return `query Me {
+    me {
+      id
+      email
+      projects {
+        id
+        projectId
+        name
+      }
+    }
+  }`
 }
 
 async function fetchProjects() {
-  const response = await fetchData()
+  const response = await fetchData(getFetchProjectsQuery())
 
   const json = await response.json()
   const { data, error } = getDataOrError(json)
@@ -57,24 +63,4 @@ function getDataOrError(json) {
   return { data: json.data.me }
 }
 
-async function fetchData() {
-  const stringifiedBody = JSON.stringify({
-    query: `query Me {
-      me {
-        id
-        email
-        projects {
-          id
-          projectId
-          name
-        }
-      }
-    }`
-  })
 
-  return await fetch(basePath, {
-    headers: headers,
-    method: "POST",
-    body: stringifiedBody
-  })
-}

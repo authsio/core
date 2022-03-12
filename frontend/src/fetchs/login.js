@@ -3,18 +3,10 @@ import useNetwork from "./network.js"
 const { basePath } = useNetwork()
 let { headers } = useNetwork()
 
-export default function useLogin(authToken) {
-  headers = updateHeaders(authToken)
+export default function useLogin() {
 
   return {
     submitLoginForm
-  }
-}
-
-function updateHeaders(authToken) {
-  return {
-    ...headers,
-    'Authorization': `Bearer ${authToken}`
   }
 }
 

@@ -9,6 +9,6 @@ const headers = {
 export default function useAuseNetwork() {
   return {
     basePath,
-    headers,
+    headers
   }
 }
