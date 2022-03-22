@@ -194,7 +194,7 @@ export class ProjectResolver {
     return null;
   }
 
-  @Mutation(() => Project)
+  @Mutation(() => Boolean)
   // NOTES: Takes an array of projectIds and deletes everything
   // Schema & Keys
   async deleteProjects(
@@ -219,8 +219,36 @@ export class ProjectResolver {
     if (!schema) {
       return false;
     }
-    console.log(ids);
-    // TODO: FLUSH OUT THE DELETE PART
+    const projects = (await sequelize.models.Project.schema(schema).findAll({
+      where: {
+        id: ids,
+      },
+    })) as Project[];
+    const checks = await Promise.all(
+      projects.map(async (i) => {
+        await sequelize.models.Key.destroy({
+          where: {
+            projectId: i.projectId,
+          },
+        });
+        await sequelize.models.Project.schema(foundKey.parentProjectId).destroy(
+          {
+            where: {
+              projectId: i.projectId,
+            },
+          }
+        );
+        await sequelize.query(`DROP SCHEMA IF EXISTS ${i.projectId} CASCADE`);
+        return true;
+      })
+    );
+    if (
+      checks.length &&
+      checks.length === projects.length &&
+      checks.filter((i) => i === false).length === 0
+    ) {
+      return true;
+    }
     return false;
   }
 }
