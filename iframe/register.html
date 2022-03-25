@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authsio</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            authsiobg: '#e7f5ff',
+            linkcolor: '#1864ab'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="">
+  <div class="main container mx-auto mt-8">
+    <section class="w-full lg:w-4/12 md:w-6/12 sm:w-8/12 mx-auto pt-6
+    border-2 rounded-xl
+    bg-slate-100
+    ">
+      <h2 class="form-title font-bold text-2xl text-center mb-6">Authsio - Register</h2>
+
+      <form class="Register-form px-4 pb-8" id="Register-form" name="Register-form"
+        onsubmit="event.preventDefault(); window.register(event)">
+
+        <fieldset class="grid grid-template-columns-1 px-5 mb-4">
+          <label for="email" class="block mb-2 ml-1 label text-sm font-bold uppercase">Email</label>
+
+          <input type="email" class="form-input peer rounded border-0 w-full px-4 py-2 px-3  
+            placeholder-slate-400 text-slate-600 bg-white text-sm shadow
+            focus:outline-none focus:ring
+            required:red
+            ease-linear transition-all duration-100" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" id="email"
+            name="email" required autocomplete="email" placeholder="Email">
+
+          <p class="
+          mt-2 h-0 invisible text-pink-600 text-sm
+          peer-invalid:visible peer-invalid:h-auto">
+            Please provide a valid email address.
+          </p>
+        </fieldset>
+
+        <fieldset class="grid grid-template-columns-1 px-5 mb-4">
+          <label for="password" class="block mb-2 ml-1 label text-sm font-bold uppercase">Password</label>
+          <input type="password" class="
+              form-input peer rounded border-0 w-full px-4 py-2 px-3  
+              placeholder-slate-400 text-slate-600 bg-white text-sm shadow
+              focus:outline-none focus:ring
+              ease-linear transition-all duration-100" pattern=".{8,}" id="password" name="password" required
+            autocomplete="new-password" placeholder="Password">
+          <p class="
+          mt-2 h-0 invisible text-pink-600 text-sm
+          peer-invalid:visible peer-invalid:h-auto">
+            Password must have at least 8 characters.
+          </p>
+        </fieldset>
+
+        <fieldset class="grid grid-template-columns-1 px-5 mb-4">
+          <label for="firstName" class="block mb-2 ml-1 label text-sm font-bold uppercase">First Name</label>
+          <input type="text" class="form-input peer rounded border-0 w-full px-4 py-2 px-3  
+          placeholder-slate-400 text-slate-600 bg-white text-sm shadow
+          focus:outline-none focus:ring
+          ease-linear transition-all duration-100" pattern=".{2,}" id="firstName" name="firstName" required
+            placeholder="First Name">
+          <p class="
+          mt-2 h-0 invisible text-pink-600 text-sm
+          peer-invalid:visible peer-invalid:h-auto">
+            First name must have at least 2 characters.
+          </p>
+        </fieldset>
+
+        <fieldset class="grid grid-template-columns-1 px-5 mb-4">
+          <label for="lastName" class="block mb-2 ml-1 label text-sm font-bold uppercase">Last Name</label>
+          <input type="text" class="form-input peer rounded border-0 w-full px-4 py-2 px-3  
+          placeholder-slate-400 text-slate-600 bg-white text-sm shadow
+          focus:outline-none focus:ring
+          ease-linear transition-all duration-100" pattern=".{2,}" id="lastName" name="lastName" required
+            placeholder="Last Name">
+          <p class="
+          mt-2 h-0 invisible text-pink-600 text-sm
+          peer-invalid:visible peer-invalid:h-auto">
+            Last name must have at least 2 characters.
+          </p>
+        </fieldset>
+
+        <fieldset class="grid grid-rows-1 items-start px-5 mb-4">
+          <button class="
+            text-sm font-bold uppercase px-6 py-3 rounded shadow bg-zinc-100
+            hover:shadow-lg outline-none
+            active:bg-zinc-50
+            focus:outline-none mx-auto my-3 w-full ease-linear transition-all duration-100" type="submit"
+            id="register">Register</button>
+
+          <a href="/index.html"
+            class="text-linkcolor text-center text-sm hover:underline visited:text-purple-600">Already have an account.
+            Login instead.
+          </a>
+        </fieldset>
+      </form>
+
+
+      <div class="grid place-content-center
+       h-12 rounded-b-xl bg-authsiobg">
+        <h3 class="text-sm">Designed by <a href="https://authsio.com"
+            class="text-linkcolor text-center text-sm hover:underline visited:text-purple-600">Authsio</a>
+        </h3>
+      </div>
+    </section>
+  </div>
+
+  <script src="./scripts/set-values.js" type="module"></script>
+  <script src="./scripts/register.js" type="module"></script>
+</body>
+
+</html>
