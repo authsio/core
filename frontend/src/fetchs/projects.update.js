@@ -40,7 +40,7 @@ async function updateProject(projectId, projectName) {
 
   const isNotSuccess = !data
   if (isNotSuccess) {
-    alert("Something went wrong. If the message perssits, kindly contact Authsio.com")
+    alert("Something went wrong. If the message persists, kindly contact Authsio.com")
     return
   }
 
