@@ -11,7 +11,6 @@ import {
   Table,
 } from "sequelize-typescript";
 import { Field, ID, ObjectType } from "type-graphql";
-import { Key } from "../keys/key.type";
 import { User } from "../users/user.type";
 
 @ObjectType()
