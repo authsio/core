@@ -1,16 +1,41 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	import useLogin from '../fetchs/login';
 	let login;
 
 	onMount(() => {
+		const hasAuthValues = setValues();
+		if (hasAuthValues) {
+			goto('/dashboard');
+			return;
+		}
+
 		const { submitLoginForm } = useLogin(localStorage.jwt);
 		login = submitLoginForm;
 	});
 
 	let isUnregistered = true;
 	let fullName = '';
+
+	function setValues() {
+		const params = new URLSearchParams(window.location.search);
+
+		const xApiKey = params.get('x_api_key');
+
+		if (xApiKey) {
+			localStorage.setItem('x-api-key', xApiKey);
+		}
+
+		const token = params.get('auth_token');
+		if (token) {
+			localStorage.setItem('jwt', token);
+		}
+
+		const hasApiKeyAndAuthToken = !!(localStorage['x-api-key'] && localStorage.jwt);
+		return hasApiKeyAndAuthToken;
+	}
 </script>
 
 <div class="container px-6 py-10">
@@ -41,16 +66,6 @@
 					required
 				/>
 			</fieldset>
-
-			<!-- <fieldset class="flex flex-col my-2">
-				<label for="firstname">First Name</label>
-				<input class="px-3 px1 my-2" type="text" id="firstname" name="firstname" required />
-			</fieldset>
-
-			<fieldset class="flex flex-col my-2">
-				<label for="lastname">Last Name</label>
-				<input class="px-3 px1 my-2" type="text" id="lastname" name="lastname" required />
-			</fieldset> -->
 
 			<fieldset class="flex flex-col mt-4">
 				<button

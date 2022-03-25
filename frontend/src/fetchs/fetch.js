@@ -12,6 +12,8 @@ export default function useFetch(authToken) {
 }
 
 function updateHeaders(authToken) {
+  if (!authToken) { return { headers } }
+
   return {
     ...headers,
     'Authorization': `Bearer ${authToken}`

@@ -4,7 +4,6 @@ const { basePath } = useNetwork()
 let { headers } = useNetwork()
 
 export default function useLogin() {
-
   return {
     submitLoginForm
   }

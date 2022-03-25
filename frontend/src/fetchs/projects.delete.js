@@ -13,18 +13,16 @@ export default function useRetrieveProjects(authToken) {
 function getDeleteProjectMutation(projectId) {
   return `mutation Mutation {
     deleteProjects(
-      projectIds: ["${projectId}"],
-    ) {
-      name
-    }
+      projectIds: ["${projectId}"]
+    )
   }`
 }
 
 async function deleteProject(projectId, projectName) {
-  const response = await fetchData(getDeleteProjectMutation(projectId, projectName))
+  const response = await fetchData(getDeleteProjectMutation(projectId))
 
   const json = await response.json()
-  const { data, error } = getDataOrError(json)
+  const { wasDeleted, error } = getDataOrError(json)
 
   if (error) {
     const dataNotFound = error === "Failed to delete project"
@@ -37,16 +35,7 @@ async function deleteProject(projectId, projectName) {
     return
   }
 
-  const isNotSuccess = !data
-  if (isNotSuccess) {
-    alert("Something went wrong. If the message perssits, kindly contact Authsio.com")
-    return
-  }
-
-  alert(`Successfully deleted project ${projectName}. Redirecting you to your dashboard.`);
-
-  const { id: returnedId } = data
-  return returnedId
+  return wasDeleted
 }
 
 function getDataOrError(json) {
@@ -56,7 +45,7 @@ function getDataOrError(json) {
     return { error: firstError }
   }
 
-  return { data: json.data.deleteProject }
+  return { wasDeleted: json.data.deleteProjects }
 }
 
 

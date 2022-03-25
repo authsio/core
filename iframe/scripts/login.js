@@ -37,7 +37,8 @@ async function handleLogin(form) {
 
   const successMessage = "You have successfully logged in. You will be redirected to your platform."
   alert(successMessage)
-  window.location = "https://acme.com"
+
+  window.location = `http://localhost:3000?x_api_key=${localStorage.getItem('x-api-key')}&auth_token=${localStorage.getItem('jwt')}`
 }
 
 function getDataOrError(json) {

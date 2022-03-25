@@ -40,9 +40,7 @@
             focus:outline-none focus:ring
             required:red
             ease-linear transition-all duration-100" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" id="email"
-            name="email" required 
-            autocomplete="email"
-            placeholder="Email">
+            name="email" required autocomplete="email" placeholder="Email">
 
           <p class="
           mt-2 h-0 invisible text-pink-600 text-sm
@@ -58,8 +56,7 @@
               placeholder-slate-400 text-slate-600 bg-white text-sm shadow
               focus:outline-none focus:ring
               ease-linear transition-all duration-100" pattern=".{8,}" id="password" name="password" required
-            autocomplete="new-password"
-            placeholder="Password">
+            autocomplete="new-password" placeholder="Password">
           <p class="
           mt-2 h-0 invisible text-pink-600 text-sm
           peer-invalid:visible peer-invalid:h-auto">
@@ -103,8 +100,9 @@
             focus:outline-none mx-auto my-3 w-full ease-linear transition-all duration-100" type="submit"
             id="register">Register</button>
 
-          <a href="/login.html" class="text-linkcolor text-center text-sm hover:underline visited:text-purple-600"
-            target="_blank">Already have an account. Login instead.
+          <a href="/index.html"
+            class="text-linkcolor text-center text-sm hover:underline visited:text-purple-600">Already have an account.
+            Login instead.
           </a>
         </fieldset>
       </form>
@@ -119,6 +117,7 @@
     </section>
   </div>
 
+  <script src="./scripts/set-values.js" type="module"></script>
   <script src="./scripts/register.js" type="module"></script>
 </body>
 

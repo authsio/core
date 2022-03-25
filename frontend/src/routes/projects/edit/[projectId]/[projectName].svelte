@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
 	import ProjectFrom from '../../../../components/ProjectFrom.svelte';
@@ -41,7 +42,11 @@
 	}
 
 	async function sumbitDeleteProject() {
-		return await delProject(projectId);
+		const wasDeleted = await delProject(projectId, projectName);
+		if (wasDeleted) {
+			alert(`Successfully deleted project ${projectName}. Redirecting you to your dashboard.`);
+			goto('/dashboard');
+		}
 	}
 </script>
 
