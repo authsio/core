@@ -1,3 +1,5 @@
+# THIS IDEA WAS FUN BUT IS DEAD NOW AND SHOULD NOT BE TRUSTED FOR ANYTHING!!!
+
 ![Logo!](https://avatars.githubusercontent.com/u/98192226?s=200&v=4)
 
 # Authsio
